@@ -1,22 +1,39 @@
 const express = require('express');
-
-const ServerConfig = require('./config/serverConfig');
-const connectDB = require('./config/dbConfig');
-
+const mysql = require('mysql2');
+const connection = require('./db/sql.js')
 const app = express();
 
-app.use(express.json());
-app.use(express.text());
-app.use(express.urlencoded());
+// app.use(express.json());
+// app.use(express.text());
+// app.use(express.urlencoded());
 
-app.post('/ping', (req, res)=>{
-    console.log(req.body);
-    return res.json({message:"pong"})
+
+// app.post('/ping', (req, res)=>{
+//     console.log(req.body);
+//     return res.json({message:"pong"})
+// })
+
+const port = 3002
+
+app.listen( port, async ()=>{
+    console.log(`Your server is open on ${port}`)
 })
 
+app.get('', (req, res) => {
+  res.send("home page");
+});
 
-app.listen(ServerConfig.PORT, async ()=>{
-    await connectDB();
-    console.log(`Server started at ${ServerConfig.PORT}`);
-})
+
+
+// Route to fetch all users
+app.get('/product', (req, res) => {
+  connection.query('SELECT * FROM items', (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).send('Database error');
+    }
+    res.json(results);
+  });
+});
+
 
