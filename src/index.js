@@ -1,11 +1,15 @@
-const express = require('express');
-const mysql = require('mysql2');
-const connection = require('./db/sql.js')
+import express from 'express';
+import mysql from 'mysql2';
+import multer from 'multer';
+import connection from './db/sql.js';
+import upload from './multer/index.js' ;
+
+
 const app = express();
 
-// app.use(express.json());
-// app.use(express.text());
-// app.use(express.urlencoded());
+app.use(express.json());
+app.use(express.text());
+app.use(express.urlencoded());
 
 
 // app.post('/ping', (req, res)=>{
@@ -19,7 +23,7 @@ app.listen( port, async ()=>{
     console.log(`Your server is open on ${port}`)
 })
 
-app.get('', (req, res) => {
+app.get('/', (req, res) => {
   res.send("home page");
 });
 
@@ -37,3 +41,23 @@ app.get('/product', (req, res) => {
 });
 
 
+//upload data in db
+app.post('/inputProduct', upload.single('file'), (req, res) => {
+  const { title, description, price, stock, category } = req.body;
+  const image_url = req.file ? req.file.filename : null;
+
+  const query = `
+    INSERT INTO items (title, description, price, stock, category, image_url)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [title, description, price, stock, category, image_url];
+
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Error inserting data:', err);
+      return res.status(500).send('Database error');
+    }
+    res.send('Product uploaded and saved successfully!');
+  });
+});
