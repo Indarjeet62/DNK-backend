@@ -1,63 +1,48 @@
 import express from 'express';
-import mysql from 'mysql2';
 import multer from 'multer';
-import connection from './db/sql.js';
-import upload from './multer/index.js' ;
 
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+import { signUp } from './model/usersAuthentication/index.js';
+import { logIn } from './model/usersAuthentication/index.js';
+import { addProduct, deleteProduct, seeProduct, seeProducts } from './model/product/index.js';
 
 const app = express();
+const upload = multer();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+app.use(cors({
+  origin: 'http://127.0.0.1:5500'
+}));
+
+// Use built-in body parsers only once
 app.use(express.json());
-app.use(express.text());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
+// Static folder for uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// app.post('/ping', (req, res)=>{
-//     console.log(req.body);
-//     return res.json({message:"pong"})
-// })
+const port = 3002;
 
-const port = 3002
-
-app.listen( port, async ()=>{
-    console.log(`Your server is open on ${port}`)
-})
+app.listen(port, () => {
+  console.log(`Your server is open on ${port}`);
+});
 
 app.get('/', (req, res) => {
   res.send("home page");
 });
 
+// Product routes
+app.get('/product', seeProducts);
+app.get('/product/:id', seeProduct);
+app.post('/addProduct', addProduct);
+app.delete('/item/:id', deleteProduct);
 
-
-// Route to fetch all users
-app.get('/product', (req, res) => {
-  connection.query('SELECT * FROM items', (err, results) => {
-    if (err) {
-      console.error('Database query error:', err);
-      return res.status(500).send('Database error');
-    }
-    res.json(results);
-  });
-});
-
-
-//upload data in db
-app.post('/inputProduct', upload.single('file'), (req, res) => {
-  const { title, description, price, stock, category } = req.body;
-  const image_url = req.file ? req.file.filename : null;
-
-  const query = `
-    INSERT INTO items (title, description, price, stock, category, image_url)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-
-  const values = [title, description, price, stock, category, image_url];
-
-  connection.query(query, values, (err, result) => {
-    if (err) {
-      console.error('Error inserting data:', err);
-      return res.status(500).send('Database error');
-    }
-    res.send('Product uploaded and saved successfully!');
-  });
-});
+// Auth routes with multer none to parse form data without files
+app.post('/signup', upload.none(), signUp);
+app.post('/login', upload.none(), logIn);
