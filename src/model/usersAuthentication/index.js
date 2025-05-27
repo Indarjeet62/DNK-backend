@@ -63,3 +63,17 @@ export const logIn = (req, res) => {
     res.json({ message: 'Login successful', username: user.username, mobile: user.mobile });
   });
 }
+
+
+export const userDetails = (req, res) => {
+  const query = "SELECT * FROM users";
+
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    res.status(200).json({ users: results });
+  });
+};

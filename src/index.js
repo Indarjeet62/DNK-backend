@@ -6,8 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-import { signUp } from './model/usersAuthentication/index.js';
-import { logIn } from './model/usersAuthentication/index.js';
+import { logIn , userDetails, signUp} from './model/usersAuthentication/index.js';
 import { addProduct, deleteProduct, seeProduct, seeProducts } from './model/product/index.js';
 
 const app = express();
@@ -41,8 +40,15 @@ app.get('/', (req, res) => {
 app.get('/product', seeProducts);
 app.get('/product/:id', seeProduct);
 app.post('/addProduct', addProduct);
-app.delete('/item/:id', deleteProduct);
+app.delete('/product/:id', deleteProduct);
+// Update product by ID (PUT /product/:id)
+app.put('/product/:id', );
+
+
+
 
 // Auth routes with multer none to parse form data without files
 app.post('/signup', upload.none(), signUp);
 app.post('/login', upload.none(), logIn);
+app.get('/users', userDetails);
+
