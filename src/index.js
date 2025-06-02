@@ -7,7 +7,12 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 import { logIn , userDetails, signUp} from './model/usersAuthentication/index.js';
-import { addProduct, deleteProduct, seeProduct, seeProducts } from './model/product/index.js';
+import { addProduct, deleteProduct, editProduct, seeProduct, seeProducts } from './model/product/index.js';
+import {authenticateToken} from './model/middleware/auth_middleware.js'
+
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const app = express();
 const upload = multer();
@@ -39,11 +44,10 @@ app.get('/', (req, res) => {
 // Product routes
 app.get('/product', seeProducts);
 app.get('/product/:id', seeProduct);
-app.post('/addProduct', addProduct);
+app.post('/addProduct', authenticateToken , addProduct);
 app.delete('/product/:id', deleteProduct);
 // Update product by ID (PUT /product/:id)
-app.put('/product/:id', );
-
+app.put('/product/:id', editProduct );
 
 
 
