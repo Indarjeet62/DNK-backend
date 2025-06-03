@@ -75,29 +75,34 @@ export const deleteProduct = (req, res) => {
 
 
 export const editProduct = (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = products.findIndex(p => p.id === id);
-
-  if (index === -1) return res.status(404).send('Product not found');
-
-  // Extract updated fields from request body
+  const itemId = parseInt(req.params.id, 10);
   const { title, category, description, price } = req.body;
 
-  // Basic validation (you can improve)
-  if (!title || !category || !description || typeof price !== 'number') {
+  // Basic validation
+  if (!title || !category || !description || isNaN(price)) {
     return res.status(400).send('Invalid data');
   }
 
-  // Update the product
-  products[index] = {
-    ...products[index],
-    title,
-    category,
-    description,
-    price,
-  };
+  const query = `
+    UPDATE items
+    SET title = ?, category = ?, description = ?, price = ?
+    WHERE id = ?
+  `;
 
-  res.json({ message: 'Product updated successfully', product: products[index] });
-}
+  const values = [title, category, description, price, itemId];
+
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Database update error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.json({ message: 'Product updated successfully' });
+  });
+};
 
 

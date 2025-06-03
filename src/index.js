@@ -53,6 +53,5 @@ app.put('/product/:id', editProduct );
 
 // Auth routes with multer none to parse form data without files
 app.post('/signup', upload.none(), signUp);
-app.post('/login', upload.none(), logIn);
+app.post('/login', upload.none(),  logIn);
 app.get('/users', userDetails);
-

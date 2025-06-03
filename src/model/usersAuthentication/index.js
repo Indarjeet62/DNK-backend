@@ -1,6 +1,10 @@
 import bcrypt from "bcrypt"
 import connection from "../../db/sql.js";
 
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 
 
@@ -45,6 +49,8 @@ export const signUp = async (req, res) => {
 
 
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+
 export const logIn = (req, res) => {
   const { mobile, password } = req.body;
   if (!mobile || !password) {
@@ -59,10 +65,25 @@ export const logIn = (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Incorrect password' });
 
-    // Login success (return user info or token)
-    res.json({ message: 'Login successful', username: user.username, mobile: user.mobile });
+    // ✅ Create JWT token
+    const payload = {
+      username: user.username,
+      mobile: user.mobile,
+      role: user.username == "admin" && user.mobile == "6299987191" ? "admin" : "user"
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
+
+    // ✅ Send token to frontend
+    res.json({
+      message: 'Login successful',
+      token,
+      username: user.username,
+      mobile: user.mobile
+    });
   });
-}
+};
+
 
 
 export const userDetails = (req, res) => {
