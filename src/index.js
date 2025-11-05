@@ -12,6 +12,8 @@ import {authenticateToken} from './model/middleware/auth_middleware.js'
 
 import dotenv from 'dotenv';
 dotenv.config();
+import connection from './db/sql.js';
+
 
 
 const app = express();
@@ -35,6 +37,7 @@ const port = 3002;
 
 app.listen(port, () => {
   console.log(`Your server is open on ${port}`);
+
 });
 
 app.get('/', (req, res) => {
